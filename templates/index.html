@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простий месенджер</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; }
+        #messages { border: 1px solid #ccc; padding: 10px; min-height: 200px; }
+        .message { margin: 5px 0; padding: 8px; background: #f1f1f1; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h2>Нотатки</h2>
+    <div id="messages"></div>
+
+    <input type="text" id="messageInput" placeholder="Введіть повідомлення">
+    <button onclick="sendMessage()">Відправити</button>
+
+    <script>
+        async function loadMessages() {
+            const response = await fetch("http://127.0.0.1:5000/get_messages");
+            const messages = await response.json();
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = "";
+            messages.forEach(msg => {
+                const div = document.createElement("div");
+                div.className = "message";
+                div.textContent = msg.text;
+                messagesDiv.appendChild(div);
+            });
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const text = input.value.trim();
+            if (text) {
+                await fetch("http://127.0.0.1:5000/send_message", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text })
+                });
+                input.value = "";
+                loadMessages();
+            }
+        }
+
+        // Завантаження повідомлень при завантаженні сторінки
+        loadMessages();
+    </script>
+
+</body>
+</html>
